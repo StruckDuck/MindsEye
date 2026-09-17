@@ -20,7 +20,7 @@
   }
   body{
     display:flex; align-items:center; justify-content:center;
-    min-height:100vh; overflow:hidden;
+    min-height:100vh;
   }
 
   .app{
@@ -38,16 +38,17 @@
 
   .yesno-btn{
     background:none; border:none; cursor:pointer; padding:0;
-    width: min(60vw, 210px);
+    width: min(60vw, 210px, 22vh);
     transition: transform .1s ease;
   }
   .yesno-btn:active{ transform: scale(.96); }
   .yesno-btn img{ width:100%; height:auto; display:block; }
+  .yesno-btn img[src$="-k.png"]{ filter: invert(1); }
   .yesno-btn:disabled{ opacity:.35; cursor:default; }
 
   .eye-stage{
     position:relative;
-    width: min(78vw, 300px);
+    width: min(78vw, 300px, 40vh);
     aspect-ratio: 910 / 1618;
     cursor:pointer;
   }
