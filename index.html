@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>The Eye</title>
 <style>
+  @font-face{
+    font-family: 'Monthoers';
+    src: url('assets/monthoers.ttf') format('truetype');
+    font-display: swap;
+  }
   :root{
     --ink:#14120F;
     --charcoal:#2A2620;
@@ -30,11 +35,16 @@
 
   .reset-btn{
     position:fixed; top:16px; right:16px; z-index:50;
-    background:none; border:none; cursor:pointer; padding:6px;
+    background:none; border:none; cursor:pointer;
+    padding:8px 10px;
     opacity:.75; transition: opacity .2s ease;
   }
   .reset-btn:hover{ opacity:1; }
-  .reset-btn img{ width: 90px; height:auto; display:block; }
+  .reset-btn span{
+    font-family: 'Monthoers', Georgia, serif;
+    font-size: 1.15rem;
+    color: #EAE1C8;
+  }
 
   .yesno-btn{
     position:absolute;
@@ -46,7 +56,15 @@
     z-index:5;
   }
   .yesno-btn:active{ transform: translate(-50%, -50%) scale(.94); }
-  .yesno-btn img{ width:100%; height:auto; display:block; }
+  .yesno-btn span{
+    display:block;
+    font-family: 'Monthoers', Georgia, serif;
+    font-size: 1.6rem;
+    text-align:center;
+    color: var(--charcoal);
+    white-space:nowrap;
+  }
+  .yesno-btn span.selected{ color:#C63A1D; }
   .yesno-btn:disabled{ opacity:.35; cursor:default; }
   .yes-btn-pos{ top: 12.9%; }
   .no-btn-pos{ top: 87.5%; }
@@ -73,10 +91,14 @@
     container-type: inline-size;
   }
 
-  .begin-label{ width: 46%; height:auto; }
+  .begin-text{
+    font-family: 'Monthoers', Georgia, serif;
+    font-size: 13cqw;
+    color: var(--charcoal);
+  }
 
   .lede-text{
-    font-family: Georgia, serif;
+    font-family: 'Monthoers', Georgia, serif;
     font-style: italic;
     color: var(--charcoal);
     opacity:.75;
@@ -93,7 +115,7 @@
     width: 48%;
   }
   .grid span{
-    font-family: Georgia, serif;
+    font-family: 'Monthoers', Georgia, serif;
     font-weight:600;
     color: var(--charcoal);
     font-size: 4.7cqw;
@@ -111,7 +133,7 @@
   }
   .pupils-frame{
     position:relative;
-    width: 58%;
+    width: 49.3%;
     aspect-ratio: 397 / 427;
   }
   .pupils-img{
@@ -120,7 +142,7 @@
   }
   .pupil-text{
     position:absolute;
-    font-family: Georgia, serif;
+    font-family: 'Monthoers', Georgia, serif;
     font-weight:700;
     color:#EAE1C8;
     text-align:center;
@@ -140,7 +162,7 @@
 <body>
 
 <button class="reset-btn" id="resetBtn" aria-label="Reset">
-  <img src="assets/reset.png" alt="Reset">
+  <span>RESET</span>
 </button>
 
 <div class="app">
@@ -149,10 +171,10 @@
     <div class="eye-content" id="eyeContent"></div>
     <img class="eye-top" id="eyeTop" src="assets/eye-window-open.png" alt="">
     <button class="yesno-btn yes-btn-pos" id="yesBtn" type="button" aria-label="Yes">
-      <img id="yesImg" src="assets/yes-k.png" alt="Yes">
+      <span id="yesText">YES</span>
     </button>
     <button class="yesno-btn no-btn-pos" id="noBtn" type="button" aria-label="No">
-      <img id="noImg" src="assets/no-k.png" alt="No">
+      <span id="noText">NO</span>
     </button>
   </div>
 
@@ -168,8 +190,8 @@
   var eyeContent = document.getElementById('eyeContent');
   var yesBtn = document.getElementById('yesBtn');
   var noBtn = document.getElementById('noBtn');
-  var yesImg = document.getElementById('yesImg');
-  var noImg = document.getElementById('noImg');
+  var yesText = document.getElementById('yesText');
+  var noText = document.getElementById('noText');
   var resetBtn = document.getElementById('resetBtn');
   var hint = document.getElementById('hint');
 
@@ -245,18 +267,21 @@
   // ============================================================
   // yes/no buttons
   // ============================================================
+  function listStep(idx){ return idx - 1; } // idx 2..13 -> step 1..12
+
   function updateAnswerButtons(){
-    var show = state.idx >= 1 && state.idx <= 12;
+    var show = state.idx >= 2 && state.idx <= 13;
     yesBtn.style.visibility = show ? 'visible' : 'hidden';
     noBtn.style.visibility = show ? 'visible' : 'hidden';
-    var ans = state.answers[state.idx];
-    yesImg.src = (ans === true) ? 'assets/yes-r.png' : 'assets/yes-k.png';
-    noImg.src = (ans === false) ? 'assets/no-r.png' : 'assets/no-k.png';
+    var ans = show ? state.answers[listStep(state.idx)] : undefined;
+    yesText.classList.toggle('selected', ans === true);
+    noText.classList.toggle('selected', ans === false);
   }
   function handleAnswerTap(isYes){
-    if (state.idx < 1 || state.idx > 12) return;
-    state.answers[state.idx] = isYes;
-    state.answered[state.idx] = true;
+    if (state.idx < 2 || state.idx > 13) return;
+    var step = listStep(state.idx);
+    state.answers[step] = isYes;
+    state.answered[step] = true;
     updateAnswerButtons();
   }
   yesBtn.addEventListener('click', function(e){ e.stopPropagation(); handleAnswerTap(true); });
@@ -271,21 +296,30 @@
     eyeContent.innerHTML = '';
 
     if (state.idx === 0){
-      var img = document.createElement('img');
-      img.className = 'begin-label';
-      img.src = 'assets/begin.png';
-      img.alt = 'Begin';
-      eyeContent.appendChild(img);
+      var beginEl = document.createElement('div');
+      beginEl.className = 'begin-text';
+      beginEl.textContent = 'BEGIN';
+      eyeContent.appendChild(beginEl);
       setHint('Tap the eye to begin.');
       return;
     }
 
-    if (state.idx >= 1 && state.idx <= 12){
-      var pos = stepPos(state.idx);
+    if (state.idx === 1){
+      var instr = document.createElement('div');
+      instr.className = 'lede-text';
+      instr.textContent = 'Pick a card. Think of a number between 1 and 52. Then tap the eye.';
+      eyeContent.appendChild(instr);
+      setHint('Tap the eye when ready.');
+      return;
+    }
+
+    if (state.idx >= 2 && state.idx <= 13){
+      var step = listStep(state.idx);
+      var pos = stepPos(step);
       var bit = bitForPos(pos);
       var grid = document.createElement('div');
       grid.className = 'grid';
-      if (stepType(state.idx) === 'number'){
+      if (stepType(step) === 'number'){
         NUMBER_BIT_LISTS[bit].forEach(function(n){
           var s = document.createElement('span');
           s.textContent = n;
@@ -300,11 +334,11 @@
         });
       }
       eyeContent.appendChild(grid);
-      setHint(state.answered[state.idx] ? 'Tap the eye to continue.' : 'Tap their answer, then tap the eye.');
+      setHint(state.answered[step] ? 'Tap the eye to continue.' : 'Tap their answer, then tap the eye.');
       return;
     }
 
-    // idx 13: reveal handled separately by playReveal(), leave blank here
+    // idx 14: reveal handled separately by playReveal(), leave blank here
     setHint('');
   }
 
@@ -338,6 +372,7 @@
     numText.style.left = (135/397*100) + '%';
     numText.style.top = (134/427*100) + '%';
     numText.style.fontSize = '9cqw';
+    numText.style.color = '#D0D0D1';
     numText.textContent = decodedNumber;
 
     var cardText = document.createElement('div');
@@ -357,20 +392,20 @@
     var fromTop = Math.random() < 0.5;
     var jitterX = (Math.random() * 16 - 8);   // final resting offset, "center-ish"
     var jitterY = (Math.random() * 16 - 8);
-    var startY = fromTop ? -160 : 160;
-    var midY = fromTop ? -40 : 40;
+    var startY = fromTop ? -90 : 90;
+    var midY = fromTop ? -20 : 20;
     var arcSide = Math.random() < 0.5 ? 1 : -1;
-    var startX = arcSide * 70;
-    var midX = -arcSide * 25;
+    var startX = arcSide * 30;
+    var midX = -arcSide * 10;
 
     numText.style.transform = 'translate(-50%, -50%) rotate(' + (Math.random()*16-8) + 'deg)';
     cardText.style.transform = 'translate(-50%, -50%) rotate(' + (Math.random()*16-8) + 'deg)';
 
     var anim = frame.animate([
-      { transform: 'translate(' + startX + 'px,' + startY + 'px) scale(.6)', opacity: 0 },
-      { transform: 'translate(' + midX + 'px,' + midY + 'px) scale(.85)', opacity: 0.85, offset: 0.55 },
-      { transform: 'translate(' + jitterX + 'px,' + jitterY + 'px) scale(1)', opacity: 1 }
-    ], { duration: 2600, easing: 'cubic-bezier(.22,.61,.36,1)', fill: 'forwards' });
+      { transform: 'translate(' + startX + 'px,' + startY + 'px)', opacity: 0 },
+      { transform: 'translate(' + midX + 'px,' + midY + 'px)', opacity: 0.85, offset: 0.55 },
+      { transform: 'translate(' + jitterX + 'px,' + jitterY + 'px)', opacity: 1 }
+    ], { duration: 3600, easing: 'cubic-bezier(.22,.61,.36,1)', fill: 'forwards' });
 
     return anim;
   }
@@ -380,15 +415,16 @@
   // ============================================================
   function canAdvance(){
     if (state.idx === 0) return true;
-    if (state.idx >= 1 && state.idx <= 12) return !!state.answered[state.idx];
-    return false; // idx 13: terminal reveal
+    if (state.idx === 1) return true;
+    if (state.idx >= 2 && state.idx <= 13) return !!state.answered[listStep(state.idx)];
+    return false; // idx 14: terminal reveal
   }
 
   function blinkAndAdvance(){
     if (state.busy) return;
     if (!canAdvance()) return;
 
-    if (state.idx === 12){
+    if (state.idx === 13){
       closeHoldOpenThenReveal();
       return;
     }
