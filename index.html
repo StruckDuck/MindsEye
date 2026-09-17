@@ -50,7 +50,7 @@
     position:absolute;
     left:50%;
     background:none; border:none; cursor:pointer; padding:0;
-    width: 30%;
+    width: 52.5%;
     transform: translate(-50%, -50%);
     transition: transform .1s ease;
     z-index:5;
@@ -59,15 +59,15 @@
   .yesno-btn span{
     display:block;
     font-family: 'Monthoers', Georgia, serif;
-    font-size: 2.5rem;
+    font-size: 4.375rem;
     text-align:center;
     color: var(--charcoal);
     white-space:nowrap;
   }
   .yesno-btn span.selected{ color:#C63A1D; }
   .yesno-btn:disabled{ opacity:.35; cursor:default; }
-  .yes-btn-pos{ top: 25%; }
-  .no-btn-pos{ top: 75%; }
+  .yes-btn-pos{ top: 16%; }
+  .no-btn-pos{ top: 84%; }
 
   .eye-stage{
     position:relative;
@@ -316,7 +316,7 @@
     if (state.idx === 2){
       var instr2 = document.createElement('div');
       instr2.className = 'lede-text';
-      instr2.innerHTML = 'Tap yes if they see their card or number.<br>Tap no if they don\u2019t.';
+      instr2.innerHTML = 'Tap yes if you see your card or number.<br>Tap no if you don\u2019t.';
       eyeContent.appendChild(instr2);
       setHint('Tap the eye when ready.');
       return;
@@ -405,7 +405,7 @@
     var midY = fromTop ? -20 : 20;
     var arcSide = Math.random() < 0.5 ? 1 : -1;
     var startX = arcSide * 30;
-    var midX = -arcSide * 10;
+    var midX = arcSide * 10;
 
     numText.style.transform = 'translate(-50%, -50%) rotate(' + (Math.random()*16-8) + 'deg)';
     cardText.style.transform = 'translate(-50%, -50%) rotate(' + (Math.random()*16-8) + 'deg)';
@@ -442,8 +442,6 @@
     state.busy = true;
     eyeStage.classList.add('busy');
 
-    eyeTop.removeAttribute('src');
-    void eyeTop.offsetWidth;
     eyeTop.src = EYE_GIF_SRC;
 
     setTimeout(function(){
@@ -464,8 +462,6 @@
     state.busy = true;
     eyeStage.classList.add('busy');
 
-    eyeTop.removeAttribute('src');
-    void eyeTop.offsetWidth;
     eyeTop.src = CLOSING_GIF_SRC;
 
     setTimeout(function(){
@@ -476,8 +472,6 @@
     }, CLOSING_DURATION);
 
     setTimeout(function(){
-      eyeTop.removeAttribute('src');
-      void eyeTop.offsetWidth;
       eyeTop.src = OPENING_GIF_SRC;
     }, CLOSING_DURATION + REVEAL_HOLD_MS);
 
