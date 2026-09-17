@@ -37,14 +37,19 @@
   .reset-btn img{ width: 90px; height:auto; display:block; }
 
   .yesno-btn{
+    position:absolute;
+    left:50%;
     background:none; border:none; cursor:pointer; padding:0;
-    width: min(60vw, 210px, 22vh);
+    width: 14%;
+    transform: translate(-50%, -50%);
     transition: transform .1s ease;
+    z-index:5;
   }
-  .yesno-btn:active{ transform: scale(.96); }
+  .yesno-btn:active{ transform: translate(-50%, -50%) scale(.94); }
   .yesno-btn img{ width:100%; height:auto; display:block; }
-  .yesno-btn img[src$="-k.png"]{ filter: invert(1); }
   .yesno-btn:disabled{ opacity:.35; cursor:default; }
+  .yes-btn-pos{ top: 12.9%; }
+  .no-btn-pos{ top: 87.5%; }
 
   .eye-stage{
     position:relative;
@@ -136,19 +141,17 @@
 </button>
 
 <div class="app">
-  <button class="yesno-btn" id="yesBtn" type="button" aria-label="Yes">
-    <img id="yesImg" src="assets/yes-k.png" alt="Yes">
-  </button>
-
   <div class="eye-stage" id="eyeStage">
     <img class="eye-backer" src="assets/eye-backer.png" alt="">
     <div class="eye-content" id="eyeContent"></div>
     <img class="eye-top" id="eyeTop" src="assets/eye-window-open.png" alt="">
+    <button class="yesno-btn yes-btn-pos" id="yesBtn" type="button" aria-label="Yes">
+      <img id="yesImg" src="assets/yes-k.png" alt="Yes">
+    </button>
+    <button class="yesno-btn no-btn-pos" id="noBtn" type="button" aria-label="No">
+      <img id="noImg" src="assets/no-k.png" alt="No">
+    </button>
   </div>
-
-  <button class="yesno-btn" id="noBtn" type="button" aria-label="No">
-    <img id="noImg" src="assets/no-k.png" alt="No">
-  </button>
 
   <div class="hint" id="hint"></div>
 </div>
@@ -166,6 +169,9 @@
   var noImg = document.getElementById('noImg');
   var resetBtn = document.getElementById('resetBtn');
   var hint = document.getElementById('hint');
+
+  var EYE_GIF_SRC = 'assets/eye-window.gif';
+  var EYE_OPEN_SRC = 'assets/eye-window-open.png';
 
   var MIN_N = 1, MAX_N = 52, TOTAL = 6;
   var FRAME_MS = 90, FRAME_COUNT = 13, CLOSE_AT_FRAME = 4;
@@ -250,8 +256,8 @@
     state.answered[state.idx] = true;
     updateAnswerButtons();
   }
-  yesBtn.addEventListener('click', function(){ handleAnswerTap(true); });
-  noBtn.addEventListener('click', function(){ handleAnswerTap(false); });
+  yesBtn.addEventListener('click', function(e){ e.stopPropagation(); handleAnswerTap(true); });
+  noBtn.addEventListener('click', function(e){ e.stopPropagation(); handleAnswerTap(false); });
 
   // ============================================================
   // rendering each screen's content (drawn while the eye is open)
@@ -383,7 +389,9 @@
     state.busy = true;
     eyeStage.classList.add('busy');
 
-    eyeTop.src = 'assets/eye-window.gif?t=' + Date.now();
+    eyeTop.removeAttribute('src');
+    void eyeTop.offsetWidth;
+    eyeTop.src = EYE_GIF_SRC;
 
     setTimeout(function(){
       // eye is fully shut here -- safe to swap content with nothing visible
@@ -398,7 +406,7 @@
     }, CLOSE_DELAY);
 
     setTimeout(function(){
-      eyeTop.src = 'assets/eye-window-open.png';
+      eyeTop.src = EYE_OPEN_SRC;
       eyeStage.classList.remove('busy');
       state.busy = false;
       if (state.idx === 16){
@@ -414,7 +422,7 @@
   // ============================================================
   function resetAll(){
     state = freshState();
-    eyeTop.src = 'assets/eye-window-open.png';
+    eyeTop.src = EYE_OPEN_SRC;
     eyeStage.classList.remove('busy');
     renderContent();
     updateAnswerButtons();
