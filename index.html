@@ -194,6 +194,7 @@
 
   var EYE_GIF_SRC = 'assets/eye-window.gif';
   var EYE_OPEN_SRC = 'assets/eye-window-open.png';
+  var EYE_CLOSED_SRC = 'assets/eye-window-closed.png';
 
   var MIN_N = 1, MAX_N = 52, TOTAL = 6;
   var FRAME_MS = 90, FRAME_COUNT = 13, CLOSE_AT_FRAME = 4;
@@ -416,7 +417,10 @@
     eyeTop.src = CLOSING_GIF_SRC;
 
     setTimeout(function(){
-      // eye is now shut; closing.gif has no loop, so it stays shut on its own
+      // eye is now shut -- explicitly hold on a static frame rather than
+      // trusting a played-out GIF to sit still, which isn't reliable
+      // across every browser's handling of a non-looping GIF's last frame
+      eyeTop.src = EYE_CLOSED_SRC;
       state.idx += 1; // -> 9, the reveal
       eyeContent.innerHTML = '';
       setHint('');
