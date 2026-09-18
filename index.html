@@ -116,7 +116,7 @@
     font-family: 'Monthoers', Georgia, serif;
     font-weight:600;
     color: var(--charcoal);
-    font-size: 4cqw;
+    font-size: 6.4cqw;
     line-height:1;
     text-align:center;
   }
@@ -260,10 +260,10 @@
   // that keeps up to 26 items from overlapping. Verified with zero placement
   // failures across the worst-case 26-item lists before shipping this.
   function scatterPositions(n){
-    var cx = 0.5, cy = 0.507;
-    var rx = 0.145, ry = 0.083;
+    var cx = 0.4984, cy = 0.5003;
+    var rx = 0.2566, ry = 0.1443;
     var aspect = 1618 / 910;
-    var minDist = 0.040;
+    var minDist = 0.065;
     var pts = [];
     for (var i = 0; i < n; i++){
       var placed = false;
