@@ -116,7 +116,7 @@
     font-family: 'Monthoers', Georgia, serif;
     font-weight:600;
     color: var(--charcoal);
-    font-size: 3.5cqw;
+    font-size: 4cqw;
     line-height:1;
     text-align:center;
   }
@@ -128,8 +128,8 @@
   }
   .pupils-frame{
     position:relative;
-    width: 49.3%;
-    aspect-ratio: 397 / 427;
+    width: 65%;
+    aspect-ratio: 336 / 336;
   }
   .pupils-img{
     position:absolute; inset:0;
@@ -261,9 +261,9 @@
   // failures across the worst-case 26-item lists before shipping this.
   function scatterPositions(n){
     var cx = 0.5, cy = 0.507;
-    var rx = 0.13, ry = 0.075;
+    var rx = 0.145, ry = 0.083;
     var aspect = 1618 / 910;
-    var minDist = 0.038;
+    var minDist = 0.040;
     var pts = [];
     for (var i = 0; i < n; i++){
       var placed = false;
@@ -360,16 +360,15 @@
 
     var img = document.createElement('img');
     img.className = 'pupils-img';
-    img.src = 'assets/pupils.png';
+    img.src = 'assets/pupil.png';
     frame.appendChild(img);
 
-    // text position as % of the pupils image's own box (from the measured
-    // center of the number pupil in the 397x427 cropped sprite: (135,134)).
-    // The second pupil is left intentionally blank -- no card in this version.
+    // text position as % of the pupil image's own box (measured center of
+    // the black pupil in the 336x336 cropped sprite: (174,175))
     var numText = document.createElement('div');
     numText.className = 'pupil-text';
-    numText.style.left = (135/397*100) + '%';
-    numText.style.top = (134/427*100) + '%';
+    numText.style.left = (174/336*100) + '%';
+    numText.style.top = (175/336*100) + '%';
     numText.style.fontSize = '9cqw';
     numText.style.color = '#D0D0D1';
     numText.textContent = decodedNumber;
@@ -413,6 +412,7 @@
   function blinkAndAdvance(){
     if (state.busy) return;
     if (!canAdvance()) return;
+    clearIdleBlink();
 
     if (state.idx === 8){
       closeHoldOpenThenReveal();
@@ -429,6 +429,7 @@
       state.idx += 1;
       renderContent();
       updateAnswerButtons();
+      maybeScheduleIdleBlink();
     }, CLOSE_DELAY);
 
     setTimeout(function(){
@@ -439,6 +440,7 @@
   }
 
   function closeHoldOpenThenReveal(){
+    clearIdleBlink();
     state.busy = true;
     eyeStage.classList.add('busy');
 
@@ -460,11 +462,41 @@
     setTimeout(function(){
       eyeStage.classList.remove('busy');
       state.busy = false;
+      maybeScheduleIdleBlink();
       playReveal();
     }, CLOSING_DURATION + REVEAL_HOLD_MS + OPENING_DURATION);
   }
 
   eyeStage.addEventListener('click', blinkAndAdvance);
+
+  // ============================================================
+  // ambient idle blinks -- purely cosmetic, randomized timing, only while
+  // waiting on the BEGIN screen or lingering on the last number list
+  // ============================================================
+  var idleBlinkTimer = null;
+  function clearIdleBlink(){
+    if (idleBlinkTimer){ clearTimeout(idleBlinkTimer); idleBlinkTimer = null; }
+  }
+  function scheduleIdleBlink(){
+    clearIdleBlink();
+    var delay = 2500 + Math.random() * 4000; // 2.5-6.5s, uneven on purpose
+    idleBlinkTimer = setTimeout(function(){
+      if (state.busy || (state.idx !== 0 && state.idx !== 9)) return;
+      state.busy = true;
+      eyeStage.classList.add('busy');
+      eyeTop.src = EYE_GIF_SRC;
+      setTimeout(function(){
+        eyeTop.src = EYE_OPEN_SRC;
+        eyeStage.classList.remove('busy');
+        state.busy = false;
+        scheduleIdleBlink();
+      }, BLINK_TOTAL);
+    }, delay);
+  }
+  function maybeScheduleIdleBlink(){
+    if (state.idx === 0 || state.idx === 9) scheduleIdleBlink();
+    else clearIdleBlink();
+  }
 
   // ============================================================
   // reset
@@ -475,6 +507,7 @@
     eyeStage.classList.remove('busy');
     renderContent();
     updateAnswerButtons();
+    maybeScheduleIdleBlink();
   }
   resetBtn.addEventListener('click', resetAll);
 
@@ -483,6 +516,7 @@
   // ============================================================
   renderContent();
   updateAnswerButtons();
+  maybeScheduleIdleBlink();
 })();
 </script>
 </body>
