@@ -11,7 +11,7 @@
     font-display: swap;
   }
   :root{
-    --ink:#14120F;
+    --ink:#41504F;
     --charcoal:#2A2620;
     --focus:#C9A96E;
   }
@@ -122,9 +122,6 @@
     line-height:1;
     text-align:center;
   }
-  .grid span.card-label{ font-size: 4.1cqw; }
-  .grid span.suit-red{ color:#7A2E27; }
-  .grid span.suit-dark{ color: var(--charcoal); }
 
   .pupils-wrap{
     position:absolute; inset:0;
@@ -210,41 +207,16 @@
   var REVEAL_HOLD_MS = 2000;             // how long the eye stays shut before the reveal
 
   // ============================================================
-  // Fixed card deck -- same one-time mapping used throughout this project
+  // number lists by bit position
   // ============================================================
-  var RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
-  var SUITS = [
-    { sym:'\u2660', letter:'S', color:'dark' },
-    { sym:'\u2665', letter:'H', color:'red'  },
-    { sym:'\u2666', letter:'D', color:'red'  },
-    { sym:'\u2663', letter:'C', color:'dark' }
-  ];
-  var FIXED_NUMBER_ORDER = [24,52,11,35,49,3,21,8,39,22,40,38,43,36,13,41,48,27,42,30,6,16,26,31,1,9,2,5,7,12,33,10,15,47,44,20,25,50,17,34,19,18,23,32,51,29,28,4,14,37,46,45];
-
-  var ALL_CARDS = [];
-  SUITS.forEach(function(suit){
-    RANKS.forEach(function(rank){
-      ALL_CARDS.push({ key: rank + suit.letter, rank: rank, suit: suit, label: rank + suit.sym });
-    });
-  });
-  var CARD_TO_NUMBER = {};
-  ALL_CARDS.forEach(function(c, i){ CARD_TO_NUMBER[c.key] = FIXED_NUMBER_ORDER[i]; });
-  var NUMBER_TO_CARD = {};
-  ALL_CARDS.forEach(function(c){ NUMBER_TO_CARD[CARD_TO_NUMBER[c.key]] = c; });
-
   function numbersForBit(bit){
     var arr = [];
     for (var n = MIN_N; n <= MAX_N; n++){ if ((n >> bit) & 1) arr.push(n); }
     return arr;
   }
   var NUMBER_BIT_LISTS = [0,1,2,3,4,5].map(numbersForBit);
-  var CARD_BIT_LISTS = [0,1,2,3,4,5].map(function(bit){
-    return ALL_CARDS.filter(function(c){ return ((CARD_TO_NUMBER[c.key] >> bit) & 1) === 1; });
-  });
 
   function bitForPos(pos){ return TOTAL - pos; } // descending: pos1->32s ... pos6->1s
-  function stepType(step){ return (step % 2 === 1) ? 'number' : 'card'; }
-  function stepPos(step){ return Math.ceil(step / 2); }
 
   // ============================================================
   // state
@@ -254,10 +226,10 @@
   }
   var state = freshState();
 
-  function decodeAnswers(kind){
+  function decodeAnswers(){
     var value = 0;
     for (var pos = 1; pos <= TOTAL; pos++){
-      var step = (kind === 'number') ? (2 * pos - 1) : (2 * pos);
+      var step = pos;
       var bit = bitForPos(pos);
       if (state.answers[step]) value += (1 << bit);
     }
@@ -267,10 +239,10 @@
   // ============================================================
   // yes/no buttons
   // ============================================================
-  function listStep(idx){ return idx - 2; } // idx 3..14 -> step 1..12
+  function listStep(idx){ return idx - 2; } // idx 3..8 -> step 1..6
 
   function updateAnswerButtons(){
-    var show = state.idx >= 3 && state.idx <= 14;
+    var show = state.idx >= 3 && state.idx <= 8;
     yesBtn.style.visibility = show ? 'visible' : 'hidden';
     noBtn.style.visibility = show ? 'visible' : 'hidden';
     var ans = show ? state.answers[listStep(state.idx)] : undefined;
@@ -278,7 +250,7 @@
     noText.classList.toggle('selected', ans === false);
   }
   function handleAnswerTap(isYes){
-    if (state.idx < 3 || state.idx > 14) return;
+    if (state.idx < 3 || state.idx > 8) return;
     var step = listStep(state.idx);
     state.answers[step] = isYes;
     state.answered[step] = true;
@@ -307,7 +279,7 @@
     if (state.idx === 1){
       var instr = document.createElement('div');
       instr.className = 'lede-text';
-      instr.innerHTML = 'Pick a card.<br>Think of a number between 1 and 52.<br>Then tap the eye.';
+      instr.innerHTML = 'Think of a number<br>between 1 and 52.<br>Then tap the eye.';
       eyeContent.appendChild(instr);
       setHint('Tap the eye when ready.');
       return;
@@ -316,38 +288,28 @@
     if (state.idx === 2){
       var instr2 = document.createElement('div');
       instr2.className = 'lede-text';
-      instr2.innerHTML = 'Tap yes if you see your card or number.<br>Tap no if you don\u2019t.';
+      instr2.innerHTML = 'Tap yes if you see<br>your number.<br>Tap no if you don\u2019t.';
       eyeContent.appendChild(instr2);
       setHint('Tap the eye when ready.');
       return;
     }
 
-    if (state.idx >= 3 && state.idx <= 14){
+    if (state.idx >= 3 && state.idx <= 8){
       var step = listStep(state.idx);
-      var pos = stepPos(step);
-      var bit = bitForPos(pos);
+      var bit = bitForPos(step);
       var grid = document.createElement('div');
       grid.className = 'grid';
-      if (stepType(step) === 'number'){
-        NUMBER_BIT_LISTS[bit].forEach(function(n){
-          var s = document.createElement('span');
-          s.textContent = n;
-          grid.appendChild(s);
-        });
-      } else {
-        CARD_BIT_LISTS[bit].forEach(function(c){
-          var s = document.createElement('span');
-          s.className = 'card-label suit-' + c.suit.color;
-          s.textContent = c.label;
-          grid.appendChild(s);
-        });
-      }
+      NUMBER_BIT_LISTS[bit].forEach(function(n){
+        var s = document.createElement('span');
+        s.textContent = n;
+        grid.appendChild(s);
+      });
       eyeContent.appendChild(grid);
       setHint(state.answered[step] ? 'Tap the eye to continue.' : 'Tap their answer, then tap the eye.');
       return;
     }
 
-    // idx 15: reveal handled separately by playReveal(), leave blank here
+    // idx 9: reveal handled separately by playReveal(), leave blank here
     setHint('');
   }
 
@@ -356,9 +318,7 @@
   // each pupil's text independently jittered in rotation
   // ============================================================
   function playReveal(){
-    var decodedNumber = decodeAnswers('number');
-    var decodedCardNum = decodeAnswers('card');
-    var cardObj = NUMBER_TO_CARD[decodedCardNum] || null;
+    var decodedNumber = decodeAnswers();
 
     var wrap = document.createElement('div');
     wrap.className = 'pupils-wrap';
@@ -374,8 +334,9 @@
     img.src = 'assets/pupils.png';
     frame.appendChild(img);
 
-    // text positions as % of the pupils image's own box (from measured centers
-    // in the 397x427 cropped sprite: pupil A (135,134), pupil B (263,294))
+    // text position as % of the pupils image's own box (from the measured
+    // center of the number pupil in the 397x427 cropped sprite: (135,134)).
+    // The second pupil is left intentionally blank -- no card in this version.
     var numText = document.createElement('div');
     numText.className = 'pupil-text';
     numText.style.left = (135/397*100) + '%';
@@ -384,20 +345,11 @@
     numText.style.color = '#D0D0D1';
     numText.textContent = decodedNumber;
 
-    var cardText = document.createElement('div');
-    cardText.className = 'pupil-text';
-    cardText.style.left = (263/397*100) + '%';
-    cardText.style.top = (294/427*100) + '%';
-    cardText.style.fontSize = '7.5cqw';
-    if (cardObj && cardObj.suit.color === 'red') cardText.style.color = '#C0392B';
-    cardText.textContent = cardObj ? cardObj.label : '?';
-
     frame.appendChild(numText);
-    frame.appendChild(cardText);
     wrap.appendChild(frame);
     eyeContent.appendChild(wrap);
 
-    // randomized: enter from top or bottom, land center-ish, each text tilted independently
+    // randomized: enter from top or bottom, land center-ish, tilted slightly
     var fromTop = Math.random() < 0.5;
     var jitterX = (Math.random() * 16 - 8);   // final resting offset, "center-ish"
     var jitterY = (Math.random() * 16 - 8);
@@ -408,7 +360,6 @@
     var midX = arcSide * 10;
 
     numText.style.transform = 'translate(-50%, -50%) rotate(' + (Math.random()*16-8) + 'deg)';
-    cardText.style.transform = 'translate(-50%, -50%) rotate(' + (Math.random()*16-8) + 'deg)';
 
     var anim = frame.animate([
       { transform: 'translate(' + startX + 'px,' + startY + 'px)' },
@@ -426,15 +377,15 @@
     if (state.idx === 0) return true;
     if (state.idx === 1) return true;
     if (state.idx === 2) return true;
-    if (state.idx >= 3 && state.idx <= 14) return !!state.answered[listStep(state.idx)];
-    return false; // idx 15: terminal reveal
+    if (state.idx >= 3 && state.idx <= 8) return !!state.answered[listStep(state.idx)];
+    return false; // idx 9: terminal reveal
   }
 
   function blinkAndAdvance(){
     if (state.busy) return;
     if (!canAdvance()) return;
 
-    if (state.idx === 14){
+    if (state.idx === 8){
       closeHoldOpenThenReveal();
       return;
     }
@@ -466,7 +417,7 @@
 
     setTimeout(function(){
       // eye is now shut; closing.gif has no loop, so it stays shut on its own
-      state.idx += 1; // -> 13, the reveal
+      state.idx += 1; // -> 9, the reveal
       eyeContent.innerHTML = '';
       setHint('');
     }, CLOSING_DURATION);
