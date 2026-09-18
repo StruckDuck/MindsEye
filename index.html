@@ -64,46 +64,42 @@
     color: var(--charcoal);
     white-space:nowrap;
     text-shadow:
-      0.09em 0.0em 0 #a1907e,
-      0.086em 0.028em 0 #a1907e,
-      0.073em 0.053em 0 #a1907e,
-      0.053em 0.073em 0 #a1907e,
-      0.028em 0.086em 0 #a1907e,
-      0.0em 0.09em 0 #a1907e,
-      -0.028em 0.086em 0 #a1907e,
-      -0.053em 0.073em 0 #a1907e,
-      -0.073em 0.053em 0 #a1907e,
-      -0.086em 0.028em 0 #a1907e,
-      -0.09em 0.0em 0 #a1907e,
-      -0.086em -0.028em 0 #a1907e,
-      -0.073em -0.053em 0 #a1907e,
-      -0.053em -0.073em 0 #a1907e,
-      -0.028em -0.086em 0 #a1907e,
-      -0.0em -0.09em 0 #a1907e,
-      0.028em -0.086em 0 #a1907e,
-      0.053em -0.073em 0 #a1907e,
-      0.073em -0.053em 0 #a1907e,
-      0.086em -0.028em 0 #a1907e,
-      0.18em 0.0em 0 #a1907e,
-      0.171em 0.056em 0 #a1907e,
-      0.146em 0.106em 0 #a1907e,
-      0.106em 0.146em 0 #a1907e,
-      0.056em 0.171em 0 #a1907e,
-      0.0em 0.18em 0 #a1907e,
-      -0.056em 0.171em 0 #a1907e,
-      -0.106em 0.146em 0 #a1907e,
-      -0.146em 0.106em 0 #a1907e,
-      -0.171em 0.056em 0 #a1907e,
-      -0.18em 0.0em 0 #a1907e,
-      -0.171em -0.056em 0 #a1907e,
-      -0.146em -0.106em 0 #a1907e,
-      -0.106em -0.146em 0 #a1907e,
-      -0.056em -0.171em 0 #a1907e,
-      -0.0em -0.18em 0 #a1907e,
-      0.056em -0.171em 0 #a1907e,
-      0.106em -0.146em 0 #a1907e,
-      0.146em -0.106em 0 #a1907e,
-      0.171em -0.056em 0 #a1907e;
+      0.035em 0.0em 0 #a1907e,
+      0.033em 0.012em 0 #a1907e,
+      0.027em 0.022em 0 #a1907e,
+      0.018em 0.03em 0 #a1907e,
+      0.006em 0.034em 0 #a1907e,
+      -0.006em 0.034em 0 #a1907e,
+      -0.017em 0.03em 0 #a1907e,
+      -0.027em 0.022em 0 #a1907e,
+      -0.033em 0.012em 0 #a1907e,
+      -0.035em 0.0em 0 #a1907e,
+      -0.033em -0.012em 0 #a1907e,
+      -0.027em -0.022em 0 #a1907e,
+      -0.018em -0.03em 0 #a1907e,
+      -0.006em -0.034em 0 #a1907e,
+      0.006em -0.034em 0 #a1907e,
+      0.017em -0.03em 0 #a1907e,
+      0.027em -0.022em 0 #a1907e,
+      0.033em -0.012em 0 #a1907e,
+      0.065em 0.0em 0 #a1907e,
+      0.061em 0.022em 0 #a1907e,
+      0.05em 0.042em 0 #a1907e,
+      0.033em 0.056em 0 #a1907e,
+      0.011em 0.064em 0 #a1907e,
+      -0.011em 0.064em 0 #a1907e,
+      -0.032em 0.056em 0 #a1907e,
+      -0.05em 0.042em 0 #a1907e,
+      -0.061em 0.022em 0 #a1907e,
+      -0.065em 0.0em 0 #a1907e,
+      -0.061em -0.022em 0 #a1907e,
+      -0.05em -0.042em 0 #a1907e,
+      -0.033em -0.056em 0 #a1907e,
+      -0.011em -0.064em 0 #a1907e,
+      0.011em -0.064em 0 #a1907e,
+      0.032em -0.056em 0 #a1907e,
+      0.05em -0.042em 0 #a1907e,
+      0.061em -0.022em 0 #a1907e;
   }
   .yesno-btn span.selected{ color:#C63A1D; }
   .yesno-btn:disabled{ opacity:.35; cursor:default; }
@@ -171,6 +167,7 @@
     position:relative;
     width: 37.05%;
     aspect-ratio: 336 / 336;
+    will-change: transform;
   }
   .pupils-img{
     position:absolute; inset:0;
@@ -428,10 +425,10 @@
       { transform: 'translate(0px, 0px)' }
     ], { duration: RISE_DURATION, easing: 'cubic-bezier(.22,.61,.36,1)', fill: 'forwards' });
 
-    // once settled, wait 6s, then begin occasional saccade-like micro-jumps
+    // once settled, wait 1s, then begin occasional saccade-like micro-jumps
     setTimeout(function(){
       scheduleSaccade(frame, 0, 0);
-    }, RISE_DURATION + 6000);
+    }, RISE_DURATION + 1000);
 
     return anim;
   }
@@ -439,17 +436,20 @@
   // ambient saccade micro-movements after the reveal has settled -- quick,
   // small, irregular jumps for atmosphere, cleared on reset
   var saccadeTimer = null;
+  var saccadeAnim = null;
   function clearSaccade(){
     if (saccadeTimer){ clearTimeout(saccadeTimer); saccadeTimer = null; }
+    if (saccadeAnim){ saccadeAnim.cancel(); saccadeAnim = null; }
   }
   function scheduleSaccade(frame, curX, curY){
-    clearSaccade();
+    if (saccadeTimer){ clearTimeout(saccadeTimer); saccadeTimer = null; }
     var delay = 1500 + Math.random() * 3500;
     saccadeTimer = setTimeout(function(){
       if (!frame.isConnected) return; // reset happened underneath us
+      if (saccadeAnim){ saccadeAnim.cancel(); }
       var dx = Math.random() * 24 - 12;
       var dy = Math.random() * 24 - 12;
-      frame.animate([
+      saccadeAnim = frame.animate([
         { transform: 'translate(' + curX + 'px,' + curY + 'px)' },
         { transform: 'translate(' + dx + 'px,' + dy + 'px)' }
       ], { duration: 90 + Math.random() * 70, easing: 'ease-out', fill: 'forwards' });
