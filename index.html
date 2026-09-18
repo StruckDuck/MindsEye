@@ -299,7 +299,7 @@
   // failures across the worst-case 26-item lists before shipping this.
   function scatterPositions(n){
     var cx = 0.4984, cy = 0.5003;
-    var rx = 0.2566, ry = 0.1443;
+    var rx = 0.241, ry = 0.138;
     var aspect = 1618 / 910;
     var minDist = 0.065;
     var pts = [];
@@ -419,9 +419,15 @@
     eyeContent.appendChild(wrap);
 
     // straight vertical rise from directly below, no arc, no horizontal
-    // deviation at any point, lands dead-center every time
+    // deviation at any point, lands dead-center every time. The start
+    // offset is computed from the eye's actual rendered height so the
+    // pupil begins genuinely hidden under the opaque card art (the visible
+    // window's half-height is about 25% of the eye's height; 34% gives a
+    // safe margin so it's not just sitting at the edge already visible)
+    var stageH = eyeStage.getBoundingClientRect().height || 500;
+    var startY = stageH * 0.34;
     var anim = frame.animate([
-      { transform: 'translate(0px, 90px)' },
+      { transform: 'translate(0px, ' + startY + 'px)' },
       { transform: 'translate(0px, 0px)' }
     ], { duration: RISE_DURATION, easing: 'cubic-bezier(.22,.61,.36,1)', fill: 'forwards' });
 
