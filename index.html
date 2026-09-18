@@ -56,15 +56,13 @@
     z-index:5;
   }
   .yesno-btn:active{ transform: translate(-50%, -50%) scale(.94); }
-  .btn-backer{
-    position:absolute; inset:0;
+  .yesno-btn span{
     display:block;
     font-family: 'Monthoers', Georgia, serif;
     font-size: 4.375rem;
     text-align:center;
-    color: #a1907e;
+    color: var(--charcoal);
     white-space:nowrap;
-    pointer-events:none;
     text-shadow:
       0.035em 0.0em 0 #a1907e,
       0.033em 0.012em 0 #a1907e,
@@ -102,15 +100,6 @@
       0.032em -0.056em 0 #a1907e,
       0.05em -0.042em 0 #a1907e,
       0.061em -0.022em 0 #a1907e;
-  }
-  .yesno-btn span:not(.btn-backer){
-    position:relative;
-    display:block;
-    font-family: 'Monthoers', Georgia, serif;
-    font-size: 4.375rem;
-    text-align:center;
-    color: var(--charcoal);
-    white-space:nowrap;
   }
   .yesno-btn span.selected{ color:#C63A1D; }
   .yesno-btn:disabled{ opacity:.35; cursor:default; }
@@ -210,11 +199,9 @@
     <div class="eye-content" id="eyeContent"></div>
     <img class="eye-top" id="eyeTop" src="assets/eye-window-open.png" alt="">
     <button class="yesno-btn yes-btn-pos" id="yesBtn" type="button" aria-label="Yes">
-      <span class="btn-backer" aria-hidden="true">YES</span>
       <span id="yesText">YES</span>
     </button>
     <button class="yesno-btn no-btn-pos" id="noBtn" type="button" aria-label="No">
-      <span class="btn-backer" aria-hidden="true">NO</span>
       <span id="noText">NO</span>
     </button>
   </div>
@@ -586,12 +573,24 @@
   // ============================================================
   function resetAll(){
     clearSaccade();
-    state = freshState();
-    eyeTop.src = EYE_OPEN_SRC;
-    eyeStage.classList.remove('busy');
-    renderContent();
-    updateAnswerButtons();
-    maybeScheduleIdleBlink();
+    clearIdleBlink();
+    eyeStage.classList.add('busy');
+    eyeTop.src = EYE_GIF_SRC;
+
+    setTimeout(function(){
+      // eye is shut here -- swap to the fresh BEGIN screen with nothing visible
+      state = freshState();
+      state.busy = true;
+      renderContent();
+      updateAnswerButtons();
+    }, CLOSE_DELAY);
+
+    setTimeout(function(){
+      eyeTop.src = EYE_OPEN_SRC;
+      eyeStage.classList.remove('busy');
+      state.busy = false;
+      maybeScheduleIdleBlink();
+    }, BLINK_TOTAL);
   }
   resetBtn.addEventListener('click', resetAll);
 
