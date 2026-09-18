@@ -71,7 +71,7 @@
 
   .eye-stage{
     position:relative;
-    width: min(78vw, 300px, 40vh);
+    width: min(92vw, 48vh);
     aspect-ratio: 910 / 1618;
     cursor:pointer;
   }
@@ -411,9 +411,9 @@
     cardText.style.transform = 'translate(-50%, -50%) rotate(' + (Math.random()*16-8) + 'deg)';
 
     var anim = frame.animate([
-      { transform: 'translate(' + startX + 'px,' + startY + 'px)', opacity: 0 },
-      { transform: 'translate(' + midX + 'px,' + midY + 'px)', opacity: 0.85, offset: 0.55 },
-      { transform: 'translate(' + jitterX + 'px,' + jitterY + 'px)', opacity: 1 }
+      { transform: 'translate(' + startX + 'px,' + startY + 'px)' },
+      { transform: 'translate(' + midX + 'px,' + midY + 'px)', offset: 0.55 },
+      { transform: 'translate(' + jitterX + 'px,' + jitterY + 'px)' }
     ], { duration: 3600, easing: 'cubic-bezier(.22,.61,.36,1)', fill: 'forwards' });
 
     return anim;
