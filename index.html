@@ -370,11 +370,12 @@
       var cloud = document.createElement('div');
       cloud.className = 'cloud';
       var positions = scatterPositions(NUMBER_BIT_LISTS[bit].length);
-      shuffledCopy(NUMBER_BIT_LISTS[bit]).forEach(function(n, i){
+      var sortedPositions = positions.slice().sort(function(a, b){ return a.y - b.y; });
+      NUMBER_BIT_LISTS[bit].forEach(function(n, i){
         var s = document.createElement('span');
         s.textContent = n;
-        s.style.left = (positions[i].x * 100) + '%';
-        s.style.top = (positions[i].y * 100) + '%';
+        s.style.left = (sortedPositions[i].x * 100) + '%';
+        s.style.top = (sortedPositions[i].y * 100) + '%';
         s.style.transform = 'translate(-50%, -50%) rotate(' + (Math.random()*20-10) + 'deg)';
         cloud.appendChild(s);
       });
